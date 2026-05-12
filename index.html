@@ -689,22 +689,23 @@
     @media (min-width: 1181px) {
       html,
       body {
-        height: 100svh;
+        min-height: 100svh;
       }
 
       body {
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
         display: grid;
-        grid-template-rows: minmax(0, 1fr) auto auto;
+        grid-template-rows: auto auto auto;
       }
 
-      .page {
+            .page {
         width: 100%;
-        min-height: 0;
+        min-height: auto;
         align-items: center;
         grid-template-columns: minmax(430px, .9fr) minmax(540px, 1.1fr);
         gap: clamp(22px, 3vw, 52px);
-        padding: clamp(18px, 2.4vw, 42px) clamp(26px, 4vw, 72px) 0;
+        padding: clamp(18px, 2.4vw, 42px) clamp(26px, 4vw, 72px) 24px;
       }
 
       .copy {
@@ -904,9 +905,10 @@
         transform: perspective(1200px) rotateX(55deg) rotateZ(-1deg) translateY(-48px);
       }
 
-      .benefits {
+            .benefits {
         width: 100%;
-        padding: 2px clamp(26px, 4vw, 72px) 8px;
+        padding: 18px clamp(26px, 4vw, 72px) 12px;
+        margin-top: 8px;
       }
 
       .benefit {
@@ -935,6 +937,7 @@
     @media (min-width: 1181px) and (max-height: 820px) {
       .page {
         padding-top: 14px;
+        padding-bottom: 18px;
         gap: clamp(18px, 2.4vw, 40px);
       }
 
@@ -1010,8 +1013,10 @@
         bottom: -24px;
       }
 
-      .benefits {
-        padding-bottom: 4px;
+            .benefits {
+        padding-top: 14px;
+        padding-bottom: 8px;
+        margin-top: 6px;
       }
 
       .benefit {
