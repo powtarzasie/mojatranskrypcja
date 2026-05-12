@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lokalny voice-to-text na Windows — Whisper offline</title>
+  <meta name="description" content="Lokalny voice-to-text na Windows oparty o OpenAI Whisper large-v3. Działa offline, po polsku i za darmo." />
+  <style>
+    :root {
+      --bg-dark: #020a1d;
+      --bg-blue: #063b7c;
+      --cyan: #63f4ff;
+      --cyan-2: #19d7f0;
+      --text: #f5fbff;
+      --muted: #d8efff;
+      --line: rgba(128, 219, 255, .24);
+      --panel: rgba(5, 20, 48, .92);
+      --shadow-cyan: 0 0 38px rgba(35, 222, 255, .42);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 72% 22%, rgba(0, 155, 255, .48), transparent 28%),
+        radial-gradient(circle at 46% 62%, rgba(0, 233, 255, .25), transparent 27%),
+        linear-gradient(120deg, #02081d 0%, #041331 42%, #063b7c 100%);
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      border-radius: 50%;
+    }
+
+    body::before {
+      width: 52vw;
+      height: 52vw;
+      left: -22vw;
+      bottom: -28vw;
+      background: radial-gradient(circle, rgba(0, 215, 255, .24), transparent 67%);
+    }
+
+    body::after {
+      width: 40vw;
+      height: 40vw;
+      right: -16vw;
+      top: -18vw;
+      background: radial-gradient(circle, rgba(66, 135, 255, .24), transparent 70%);
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(340px, .82fr) minmax(520px, 1.18fr);
+      gap: clamp(24px, 4vw, 70px);
+      max-width: 1760px;
+      margin: 0 auto;
+      padding: clamp(32px, 4.2vw, 72px) clamp(22px, 4vw, 72px) 12px;
+    }
+
+    .copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+    }
+
+    .headline {
+      margin: 0 0 24px;
+      font-size: clamp(52px, 6vw, 104px);
+      line-height: .94;
+      letter-spacing: -0.065em;
+      font-weight: 900;
+      text-shadow: 0 6px 22px rgba(0, 0, 0, .34);
+    }
+
+    .headline span {
+      display: block;
+      color: var(--cyan);
+      text-shadow: 0 0 22px rgba(91, 241, 255, .4);
+    }
+
+    .subhead {
+      margin: 0 0 34px;
+      max-width: 690px;
+      color: #d6efff;
+      font-size: clamp(21px, 1.75vw, 34px);
+      line-height: 1.26;
+      font-weight: 500;
+    }
+
+    .subhead strong {
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    .compatibility-note {
+      width: min(640px, 100%);
+      margin: -10px 0 30px;
+      padding: 18px 22px;
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      align-items: center;
+      gap: 16px;
+      border: 1px solid rgba(99, 244, 255, .28);
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(3, 19, 49, .62), rgba(5, 57, 109, .34));
+      box-shadow: inset 0 0 24px rgba(99, 244, 255, .08), 0 0 24px rgba(0, 207, 255, .12);
+      color: rgba(232, 249, 255, .92);
+      font-size: clamp(15px, 1.08vw, 20px);
+      line-height: 1.38;
+      font-weight: 500;
+    }
+
+    .compatibility-note svg {
+      width: 44px;
+      height: 44px;
+      color: var(--cyan);
+      filter: drop-shadow(0 0 12px rgba(99, 244, 255, .42));
+      stroke-width: 2.35;
+    }
+
+    .compatibility-note strong {
+      color: var(--cyan);
+      font-weight: 800;
+    }
+
+    .features {
+      width: min(560px, 100%);
+      margin: 0 0 34px;
+    }
+
+    .feature {
+      display: grid;
+      grid-template-columns: 86px 1fr;
+      align-items: center;
+      gap: 22px;
+      min-height: 104px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .feature:first-child { border-top: 1px solid rgba(117, 211, 255, .15); }
+
+    .icon-circle {
+      width: 74px;
+      height: 74px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.28), transparent 30%), linear-gradient(145deg, rgba(90, 247, 255, .95), rgba(0, 88, 202, .7));
+      box-shadow: inset 0 0 0 3px rgba(120, 245, 255, .36), 0 0 22px rgba(0, 216, 255, .45);
+      color: white;
+    }
+
+    .feature svg {
+      width: 40px;
+      height: 40px;
+      stroke-width: 3;
+    }
+
+    .feature p {
+      margin: 0;
+      font-size: clamp(23px, 2vw, 33px);
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+    }
+
+    .actions {
+      width: min(640px, 100%);
+    }
+
+    .download-btn {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      width: 100%;
+      min-height: 126px;
+      display: grid;
+      grid-template-columns: 112px 1fr;
+      align-items: center;
+      gap: 20px;
+      padding: 22px 38px;
+      border-radius: 25px;
+      background: linear-gradient(180deg, #75fbff 0%, #28d9ee 54%, #15b8da 100%);
+      color: #04214b;
+      font: inherit;
+      text-decoration: none;
+      box-shadow: 0 0 0 2px rgba(205, 255, 255, .5) inset, 0 0 32px rgba(51, 232, 255, .6), 0 18px 35px rgba(0, 0, 0, .32);
+      transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+    }
+
+    .download-btn:hover,
+    .download-btn:focus-visible {
+      transform: translateY(-2px);
+      filter: brightness(1.04);
+      box-shadow: 0 0 0 2px rgba(205, 255, 255, .74) inset, 0 0 46px rgba(51, 232, 255, .78), 0 22px 42px rgba(0, 0, 0, .35);
+      outline: none;
+    }
+
+    .download-btn svg {
+      width: 64px;
+      height: 64px;
+      stroke-width: 4.5;
+    }
+
+    .download-btn span {
+      font-size: clamp(34px, 3.5vw, 56px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      text-align: left;
+    }
+
+    .owner-card {
+      margin-top: 24px;
+      width: min(640px, 100%);
+      padding: 18px 22px;
+      border: 1px solid rgba(130, 226, 255, .24);
+      border-radius: 18px;
+      background: rgba(2, 16, 41, .38);
+      color: #d9f4ff;
+      font-size: clamp(15px, 1.05vw, 20px);
+      line-height: 1.45;
+      font-style: normal;
+    }
+
+    .owner-card a {
+      color: var(--cyan);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .owner-card a:hover { text-decoration: underline; }
+
+    .visual {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      padding: 16px 0 20px;
+      overflow: visible;
+    }
+
+    .laptop-wrap {
+      position: relative;
+      width: min(900px, 100%);
+      margin-left: auto;
+      padding-bottom: 58px;
+      isolation: isolate;
+    }
+
+    .laptop-wrap::before {
+      content: "";
+      position: absolute;
+      inset: 24% 8% 12% 1%;
+      background: radial-gradient(ellipse at 48% 52%, rgba(0, 237, 255, .42), transparent 68%);
+      filter: blur(12px);
+      z-index: -1;
+    }
+
+    .screen {
+      position: relative;
+      aspect-ratio: 1.62;
+      width: 100%;
+      border: 10px solid #08111d;
+      border-bottom-width: 22px;
+      border-radius: 28px 28px 18px 18px;
+      background: #eaf1f8;
+      box-shadow: 0 28px 70px rgba(0, 0, 0, .52), 0 0 0 2px rgba(172, 222, 255, .35), inset 0 0 0 2px rgba(255,255,255,.16);
+      overflow: hidden;
+      transform: perspective(1400px) rotateX(2deg) rotateY(-4deg) rotateZ(-1.2deg);
+      transform-origin: center;
+    }
+
+    .screen::before {
+      content: "";
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #020713;
+      box-shadow: 0 0 0 3px rgba(255,255,255,.04);
+      z-index: 3;
+    }
+
+    .word-top {
+      height: 72px;
+      background: #0d5fb4;
+      color: #fff;
+      display: flex;
+      align-items: flex-end;
+      padding: 0 28px 11px;
+      gap: 22px;
+      font-size: clamp(9px, .78vw, 13px);
+    }
+
+    .word-title {
+      font-weight: 700;
+      margin-right: 10px;
+    }
+
+    .word-ribbon {
+      height: 50px;
+      background: #f6f7f8;
+      border-bottom: 1px solid #d4dce5;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 28px;
+      color: #1a2d43;
+      font-size: clamp(8px, .7vw, 12px);
+      white-space: nowrap;
+    }
+
+    .ribbon-pill {
+      min-width: 70px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #ccd6e0;
+      border-radius: 5px;
+      background: #fff;
+      color: #25364a;
+      font-weight: 600;
+    }
+
+    .tool-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .tool-icon.line::before,
+    .tool-icon.line::after {
+      content: "";
+      position: absolute;
+      left: 2px;
+      right: 2px;
+      height: 2px;
+      background: #50657d;
+      border-radius: 2px;
+    }
+
+    .tool-icon.line::before { top: 6px; }
+    .tool-icon.line::after { top: 13px; }
+
+    .doc-area {
+      height: calc(100% - 122px);
+      padding: 44px 52px;
+      background: linear-gradient(110deg, #e9eef4, #ffffff 45%, #dfeaf6 100%);
+    }
+
+    .paper {
+      position: relative;
+      width: 78%;
+      height: 100%;
+      margin: 0 auto;
+      padding: clamp(28px, 3vw, 58px) clamp(30px, 4vw, 78px);
+      background: #fff;
+      box-shadow: 0 3px 18px rgba(20, 45, 75, .12);
+      color: #1a1a1a;
+      font-family: "Segoe UI", Arial, sans-serif;
+      font-size: clamp(15px, 1.35vw, 24px);
+      line-height: 1.55;
+    }
+
+    .paper p {
+      margin: 0;
+      max-width: 600px;
+      font-style: italic;
+    }
+
+    .caret {
+      display: inline-block;
+      width: 3px;
+      height: 1.35em;
+      background: #111;
+      transform: translateY(.27em);
+      margin-left: 4px;
+      animation: blink 1s steps(2) infinite;
+    }
+
+    @keyframes blink {
+      0%, 46% { opacity: 1; }
+      47%, 100% { opacity: 0; }
+    }
+
+    .magnifier {
+      position: absolute;
+      top: 128px;
+      right: 10px;
+      width: clamp(154px, 15vw, 236px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle at 34% 28%, #fff 0%, #f2f7fc 54%, #e7eff8 100%);
+      border: 5px solid #118ed0;
+      box-shadow: 0 12px 30px rgba(0,0,0,.25), 0 0 24px rgba(0, 200, 255, .28);
+      z-index: 6;
+      display: grid;
+      place-items: center;
+    }
+
+    .magnifier .big-caret {
+      width: 5px;
+      height: 86px;
+      background: #0f1720;
+      border-radius: 3px;
+      animation: blink 1s steps(2) infinite;
+    }
+
+    .spark {
+      position: absolute;
+      width: 18px;
+      height: 5px;
+      border-radius: 999px;
+      background: #16bff1;
+      transform-origin: right center;
+      box-shadow: 0 0 10px rgba(0, 191, 255, .65);
+    }
+
+    .spark.s1 { transform: translate(-42px, -28px) rotate(55deg); }
+    .spark.s2 { transform: translate(-52px, 0) rotate(0deg); }
+    .spark.s3 { transform: translate(-42px, 28px) rotate(-55deg); }
+
+    .arrow-glow {
+      position: absolute;
+      right: 190px;
+      top: 365px;
+      width: 230px;
+      height: 128px;
+      border-right: 6px solid rgba(123, 247, 255, .82);
+      border-top: 6px solid rgba(123, 247, 255, .82);
+      border-radius: 0 90px 0 0;
+      transform: rotate(-24deg);
+      filter: drop-shadow(0 0 18px rgba(0, 242, 255, .8));
+      opacity: .88;
+      z-index: 4;
+    }
+
+    .arrow-glow::after {
+      content: "";
+      position: absolute;
+      right: -17px;
+      top: -13px;
+      width: 0;
+      height: 0;
+      border-left: 24px solid rgba(123, 247, 255, .9);
+      border-top: 16px solid transparent;
+      border-bottom: 16px solid transparent;
+      transform: rotate(42deg);
+    }
+
+    .dictation-card {
+      position: absolute;
+      left: clamp(0px, 3vw, 28px);
+      bottom: 118px;
+      width: min(510px, 56%);
+      min-height: 166px;
+      display: grid;
+      grid-template-columns: 128px 1fr;
+      gap: 18px;
+      align-items: center;
+      padding: 24px 30px;
+      border-radius: 22px;
+      background: linear-gradient(160deg, rgba(8, 31, 72, .96), rgba(3, 17, 45, .96));
+      border: 1px solid rgba(108, 211, 255, .45);
+      box-shadow: 0 24px 55px rgba(0, 0, 0, .48), 0 0 36px rgba(0, 190, 255, .28);
+      z-index: 8;
+    }
+
+    .mic-button {
+      width: 118px;
+      height: 118px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 46%, #63ebff 0%, #1d9be4 50%, #083e8a 100%);
+      box-shadow: 0 0 0 10px rgba(0, 176, 255, .18), 0 0 0 18px rgba(0, 176, 255, .12), inset 0 0 0 3px rgba(190, 255, 255, .55);
+    }
+
+    .mic-button svg {
+      width: 62px;
+      height: 62px;
+      stroke-width: 3.6;
+    }
+
+    .dictation-copy strong {
+      display: block;
+      margin-bottom: 16px;
+      font-size: clamp(19px, 1.5vw, 29px);
+    }
+
+    .wave {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      height: 48px;
+      margin-bottom: 14px;
+    }
+
+    .wave i {
+      width: 4px;
+      border-radius: 99px;
+      background: var(--cyan);
+      box-shadow: 0 0 9px rgba(91, 241, 255, .85);
+      animation: wave 1s ease-in-out infinite;
+    }
+
+    .wave i:nth-child(1) { height: 14px; animation-delay: .03s; }
+    .wave i:nth-child(2) { height: 27px; animation-delay: .10s; }
+    .wave i:nth-child(3) { height: 20px; animation-delay: .17s; }
+    .wave i:nth-child(4) { height: 34px; animation-delay: .24s; }
+    .wave i:nth-child(5) { height: 19px; animation-delay: .31s; }
+    .wave i:nth-child(6) { height: 42px; animation-delay: .38s; }
+    .wave i:nth-child(7) { height: 23px; animation-delay: .45s; }
+    .wave i:nth-child(8) { height: 31px; animation-delay: .52s; }
+    .wave i:nth-child(9) { height: 17px; animation-delay: .59s; }
+    .wave i:nth-child(10) { height: 39px; animation-delay: .66s; }
+    .wave i:nth-child(11) { height: 25px; animation-delay: .73s; }
+    .wave i:nth-child(12) { height: 35px; animation-delay: .80s; }
+    .wave i:nth-child(13) { height: 18px; animation-delay: .87s; }
+    .wave i:nth-child(14) { height: 30px; animation-delay: .94s; }
+    .wave i:nth-child(15) { height: 21px; animation-delay: 1.01s; }
+
+    @keyframes wave {
+      0%, 100% { transform: scaleY(.72); opacity: .74; }
+      50% { transform: scaleY(1.12); opacity: 1; }
+    }
+
+    .dictation-copy span {
+      color: #9bdfff;
+      font-size: clamp(16px, 1.25vw, 23px);
+    }
+
+    .pointer {
+      position: absolute;
+      left: clamp(82px, 12vw, 126px);
+      bottom: 84px;
+      z-index: 10;
+      width: 72px;
+      height: 84px;
+      filter: drop-shadow(0 5px 4px rgba(0,0,0,.45));
+    }
+
+    .keyboard {
+      width: 92%;
+      height: 165px;
+      margin: -4px auto 0;
+      background: linear-gradient(175deg, #9faecc, #62718e 56%, #263248 100%);
+      clip-path: polygon(8% 0, 91% 0, 100% 80%, 82% 100%, 0 75%);
+      box-shadow: 0 18px 50px rgba(0,0,0,.42);
+      transform: perspective(1200px) rotateX(55deg) rotateZ(-1deg) translateY(-64px);
+      transform-origin: top center;
+      position: relative;
+      z-index: -1;
+    }
+
+    .keyboard::before {
+      content: "";
+      position: absolute;
+      inset: 24px 55px 42px 70px;
+      background: repeating-linear-gradient(0deg, rgba(4, 13, 28, .72) 0 14px, transparent 14px 22px), repeating-linear-gradient(90deg, rgba(4, 13, 28, .72) 0 48px, transparent 48px 58px);
+      border-radius: 10px;
+      opacity: .75;
+    }
+
+    .benefits {
+      position: relative;
+      z-index: 3;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      align-items: center;
+      max-width: 1760px;
+      margin: 0 auto;
+      padding: 8px clamp(22px, 4vw, 72px) 28px;
+      color: #d9f4ff;
+    }
+
+    .site-footer {
+      position: relative;
+      z-index: 3;
+      max-width: 1760px;
+      margin: 0 auto;
+      padding: 22px clamp(22px, 4vw, 72px) 34px;
+      text-align: center;
+      color: rgba(216, 239, 255, .68);
+      font-size: clamp(12px, .95vw, 15px);
+      line-height: 1.5;
+    }
+
+    .site-footer::before {
+      content: "";
+      display: block;
+      width: min(760px, 100%);
+      height: 1px;
+      margin: 0 auto 20px;
+      background: linear-gradient(90deg, transparent, rgba(99, 244, 255, .36), transparent);
+    }
+
+    .site-footer p {
+      margin: 0;
+    }
+
+    .site-footer a {
+      color: rgba(99, 244, 255, .82);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .site-footer a:hover {
+      color: #ffffff;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .benefit {
+      min-height: 72px;
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      align-items: center;
+      gap: 20px;
+      padding: 0 clamp(12px, 2vw, 36px);
+      border-left: 1px solid rgba(157, 220, 255, .35);
+      font-size: clamp(15px, 1.18vw, 22px);
+      line-height: 1.15;
+    }
+
+    .benefit:first-child { border-left: 0; }
+
+    .benefit svg {
+      width: 52px;
+      height: 52px;
+      color: #83f4ff;
+      stroke-width: 2.4;
+      filter: drop-shadow(0 0 10px rgba(0, 232, 255, .36));
+    }
+
+    @media (max-width: 1180px) {
+      .page {
+        grid-template-columns: 1fr;
+        padding-bottom: 20px;
+      }
+
+      .copy {
+        align-items: center;
+        text-align: center;
+      }
+
+      .features,
+      .actions,
+      .owner-card,
+      .compatibility-note {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .visual {
+        justify-content: center;
+        padding: 0 0 18px;
+      }
+
+      .laptop-wrap {
+        margin: 0 auto;
+        width: min(860px, 100%);
+      }
+
+      .benefits {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        row-gap: 18px;
+        padding-top: 14px;
+      }
+
+      .benefit:nth-child(3) { border-left: 0; }
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        padding: 28px 16px 12px;
+        gap: 28px;
+      }
+
+      .headline { font-size: clamp(44px, 15vw, 70px); }
+      .subhead { font-size: 20px; }
+
+      .compatibility-note {
+        grid-template-columns: 44px 1fr;
+        margin: -6px 0 24px;
+        padding: 15px 16px;
+        text-align: left;
+        font-size: 15px;
+      }
+
+      .compatibility-note svg {
+        width: 36px;
+        height: 36px;
+      }
+
+      .feature {
+        grid-template-columns: 62px 1fr;
+        gap: 14px;
+        min-height: 82px;
+        text-align: left;
+      }
+
+      .icon-circle {
+        width: 58px;
+        height: 58px;
+      }
+
+      .feature svg {
+        width: 31px;
+        height: 31px;
+      }
+
+      .feature p { font-size: 21px; }
+
+      .download-btn {
+        grid-template-columns: 62px 1fr;
+        min-height: 88px;
+        padding: 18px 22px;
+        border-radius: 18px;
+      }
+
+      .download-btn svg {
+        width: 43px;
+        height: 43px;
+      }
+
+      .download-btn span { font-size: 32px; }
+
+      .visual {
+        transform: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .laptop-wrap {
+        padding-bottom: 24px;
+      }
+
+      .screen {
+        border-width: 7px;
+        border-bottom-width: 15px;
+        border-radius: 18px 18px 12px 12px;
+      }
+
+      .word-top {
+        height: 42px;
+        padding: 0 14px 7px;
+        gap: 10px;
+        font-size: 7px;
+      }
+
+      .word-ribbon {
+        height: 34px;
+        padding: 0 14px;
+        gap: 6px;
+        font-size: 6px;
+      }
+
+      .ribbon-pill {
+        min-width: 40px;
+        height: 20px;
+      }
+
+      .tool-icon {
+        width: 12px;
+        height: 12px;
+      }
+
+      .doc-area {
+        height: calc(100% - 76px);
+        padding: 20px 16px;
+      }
+
+      .paper {
+        width: 86%;
+        padding: 22px 20px;
+        font-size: 10px;
+      }
+
+      .magnifier {
+        top: 74px;
+        right: 0;
+        width: 118px;
+        border-width: 3px;
+      }
+
+      .magnifier .big-caret {
+        width: 3px;
+        height: 52px;
+      }
+
+      .spark {
+        width: 12px;
+        height: 3px;
+      }
+
+      .arrow-glow { display: none; }
+
+      .dictation-card {
+        left: 6px;
+        bottom: 76px;
+        width: 66%;
+        min-height: 94px;
+        grid-template-columns: 68px 1fr;
+        gap: 9px;
+        padding: 11px 13px;
+        border-radius: 16px;
+      }
+
+      .mic-button {
+        width: 62px;
+        height: 62px;
+        box-shadow: 0 0 0 6px rgba(0, 176, 255, .18), 0 0 0 11px rgba(0, 176, 255, .12), inset 0 0 0 2px rgba(190, 255, 255, .55);
+      }
+
+      .mic-button svg {
+        width: 34px;
+        height: 34px;
+      }
+
+      .dictation-copy strong {
+        margin-bottom: 6px;
+        font-size: 14px;
+      }
+
+      .wave {
+        height: 24px;
+        gap: 3px;
+        margin-bottom: 5px;
+      }
+
+      .wave i { width: 3px; }
+      .dictation-copy span { font-size: 11px; }
+
+      .pointer {
+        left: 64px;
+        bottom: 52px;
+        width: 42px;
+        height: 50px;
+      }
+
+      .keyboard {
+        height: 100px;
+        transform: perspective(1000px) rotateX(55deg) rotateZ(-1deg) translateY(-39px);
+      }
+
+      .benefits {
+        grid-template-columns: 1fr;
+        padding: 8px 18px 18px;
+        row-gap: 12px;
+      }
+
+      .site-footer {
+        padding: 18px 18px 28px;
+      }
+
+      .benefit,
+      .benefit:nth-child(3) {
+        border-left: 0;
+        border-top: 1px solid rgba(157, 220, 255, .25);
+        grid-template-columns: 48px 1fr;
+        padding: 8px 0;
+        min-height: 54px;
+        font-size: 15px;
+      }
+
+      .benefit:first-child { border-top: 0; }
+
+      .benefit svg {
+        width: 38px;
+        height: 38px;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .headline { letter-spacing: -0.055em; }
+      .download-btn span { font-size: 28px; }
+      .visual { margin: 0; }
+      .owner-card { font-size: 14px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="copy" aria-labelledby="hero-title">
+      <h1 class="headline" id="hero-title">
+        Mówisz. Tekst trafia
+        <span>dokładnie tam,</span>
+        <span>gdzie miga kursor.</span>
+      </h1>
+
+      <p class="subhead">
+        Lokalny voice-to-text na Windows oparty o OpenAI Whisper large-v3 — w całości <strong>offline</strong>
+      </p>
+
+      <div class="compatibility-note" aria-label="Informacja o zgodności i szybkości działania">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4" y="5" width="16" height="11" rx="2"></rect>
+          <path d="M2 20h20"></path>
+          <path d="M8 16h8l1 4H7l1-4Z"></path>
+          <path d="M13 8 10 12h3l-1 3 4-5h-3l0-2Z"></path>
+        </svg>
+        <p>Działa na każdym komputerze z <strong>Windows</strong>. Z kartą <strong>NVIDIA</strong> — transkrypcja natychmiastowa. Bez GPU — też działa, tylko chwilę dłużej czeka.</p>
+      </div>
+
+      <div class="features" aria-label="Najważniejsze cechy">
+        <div class="feature">
+          <div class="icon-circle" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 1 1 2.2-3.7C10.8 5.1 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 1 0-2.2-3.7C13.2 5.1 12 7 12 7z"></path></svg>
+          </div>
+          <p>100% za darmo</p>
+        </div>
+
+        <div class="feature">
+          <div class="icon-circle" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.82a15 15 0 0 1 20 0"></path><path d="M5 12.15a10 10 0 0 1 3.6-2.05"></path><path d="M15.4 10.1A10 10 0 0 1 19 12.15"></path><path d="M8.5 15.55a5 5 0 0 1 7 0"></path><line x1="2" y1="2" x2="22" y2="22"></line></svg>
+          </div>
+          <p>Działa offline</p>
+        </div>
+
+        <div class="feature">
+          <div class="icon-circle" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path><circle cx="8" cy="11" r="1"></circle><circle cx="12" cy="11" r="1"></circle><circle cx="16" cy="11" r="1"></circle></svg>
+          </div>
+          <p>Świetnie radzi sobie<br />z językiem polskim</p>
+        </div>
+
+        <div class="feature">
+          <div class="icon-circle" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V5a2 2 0 1 1 4 0v7"></path><path d="M12 12V4a2 2 0 1 1 4 0v9"></path><path d="M16 13V7a2 2 0 1 1 4 0v9a6 6 0 0 1-6 6h-2.7a6 6 0 0 1-4.7-2.3L3.8 16a2 2 0 0 1 3-2.6L8 15"></path></svg>
+          </div>
+          <p>Jedno kliknięcie<br />i dyktujesz</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a class="download-btn" id="downloadButton" href="#" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 21h16"></path></svg>
+          <span>Pobierz za darmo</span>
+        </a>
+      </div>
+
+      <address class="owner-card">
+        Właściciel strony: <strong>Mariusz Świerguła</strong><br />
+        Kontakt: <a href="mailto:Mariusz.Swiergula@gmail.com">Mariusz.Swiergula@gmail.com</a>
+      </address>
+    </section>
+
+    <section class="visual" aria-label="Podgląd działania programu">
+      <div class="laptop-wrap">
+        <div class="screen">
+          <div class="word-top"><span>‹</span><span class="word-title">Dokument · Zapisano</span></div>
+          <div class="word-ribbon" aria-hidden="true">
+            <span>Plik</span><span>Narzędzia główne</span><span>Wstawianie</span><span>Projektowanie</span><span>Układ</span><span>Odwołania</span><span>Korespondencja</span><span>Recenzja</span><span>Widok</span><span>Pomoc</span>
+            <span class="ribbon-pill">Segoe UI</span><span class="ribbon-pill">11</span><strong>B</strong><em>I</em><u>U</u><span class="tool-icon line"></span><span class="tool-icon line"></span><span class="tool-icon line"></span>
+          </div>
+          <div class="doc-area">
+            <div class="paper"><p>Pracujemy nad nowym rozwiązaniem, które znacząco usprawni codzienną pracę zespołu i przyniesie realne korzyści naszym klientom.<span class="caret"></span></p></div>
+          </div>
+        </div>
+
+        <div class="magnifier" aria-hidden="true"><span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span><span class="big-caret"></span></div>
+        <div class="arrow-glow" aria-hidden="true"></div>
+
+        <div class="dictation-card" aria-hidden="true">
+          <div class="mic-button"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line><line x1="8" y1="22" x2="16" y2="22"></line></svg></div>
+          <div class="dictation-copy">
+            <strong>Słucham...</strong>
+            <div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <span>Mów wyraźnie po polsku</span>
+          </div>
+        </div>
+
+        <svg class="pointer" viewBox="0 0 90 110" aria-hidden="true"><path d="M28 4c6 0 10 4 10 10v42l8-8c4-4 11-3 14 2l3 6 2-2c5-5 13-2 15 5l4 15c4 15-7 30-22 30H43c-9 0-17-5-21-13L5 58c-3-6 0-13 6-16 5-2 10-1 14 4V14c0-6 4-10 10-10z" fill="#fff" stroke="#0b1730" stroke-width="5" stroke-linejoin="round"/></svg>
+        <div class="keyboard" aria-hidden="true"></div>
+      </div>
+    </section>
+  </main>
+
+  <section class="benefits" aria-label="Bezpieczeństwo i prywatność">
+    <div class="benefit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-5"></path></svg><span>Twoje dane<br />zostają u Ciebie</span></div>
+    <div class="benefit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span>Prywatność<br />i bezpieczeństwo</span></div>
+    <div class="benefit"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 3 14h8l-1 8 11-14h-8l0-6Z"></path></svg><span>Szybko i lekko<br />działa lokalnie</span></div>
+    <div class="benefit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="2"></rect><path d="M2 20h20"></path><path d="M8 16h8l1 4H7l1-4Z"></path></svg><span>Bez internetu,<br />bez kompromisów</span></div>
+  </section>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 Mariusz Świerguła &bull; <a href="mailto:Mariusz.swiergula@gmail.com">Mariusz.swiergula@gmail.com</a></p>
+  </footer>
+
+  <script>
+    // Wklej tutaj właściwy link, gdy będzie gotowy.
+    // Przykład: const DOWNLOAD_URL = "https://twojadomena.pl/pliki/whisper-setup.exe";
+    const DOWNLOAD_URL = "";
+
+    const downloadButton = document.getElementById("downloadButton");
+
+    function hasDownloadUrl() {
+      return DOWNLOAD_URL && DOWNLOAD_URL.trim().length > 0;
+    }
+
+    function prepareDownloadButton() {
+      if (!hasDownloadUrl()) return;
+      downloadButton.href = DOWNLOAD_URL;
+      downloadButton.setAttribute("download", "");
+    }
+
+    downloadButton.addEventListener("click", (event) => {
+      if (hasDownloadUrl()) return;
+      event.preventDefault();
+      alert("Link do pliku zostanie dodany później. W kodzie uzupełnij zmienną DOWNLOAD_URL.");
+    });
+
+    prepareDownloadButton();
+  </script>
+</body>
+</html>
