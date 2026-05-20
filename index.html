@@ -244,6 +244,23 @@
       text-align: left;
     }
 
+    .download-btn-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: inherit;
+      font-weight: inherit;
+      letter-spacing: inherit;
+    }
+
+    .download-btn-sub {
+      font-size: clamp(11px, .85vw, 14px);
+      font-weight: 600;
+      letter-spacing: .01em;
+      color: rgba(4, 33, 75, .72);
+      line-height: 1;
+    }
+
     .download-stats {
       margin: 14px 0 0;
       color: rgba(216, 239, 255, .86);
@@ -813,6 +830,10 @@
         font-size: clamp(28px, 2.4vw, 43px);
       }
 
+      .download-btn-sub {
+        font-size: clamp(10px, .7vw, 13px);
+      }
+
       .visual {
         align-self: center;
         justify-content: flex-end;
@@ -1306,6 +1327,502 @@
         transition-duration: .01ms !important;
       }
     }
+
+    /* ── DOWNLOAD MODAL ── */
+    .dl-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(2, 8, 29, .82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .28s ease;
+    }
+
+    .dl-overlay.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .dl-card {
+      position: relative;
+      width: min(680px, 100%);
+      border-radius: 28px;
+      border: 1px solid rgba(99, 244, 255, .3);
+      background: linear-gradient(160deg, rgba(5, 18, 48, .98) 0%, rgba(4, 28, 72, .98) 100%);
+      box-shadow: 0 0 0 1px rgba(0, 200, 255, .08) inset,
+                  0 32px 80px rgba(0, 0, 0, .56),
+                  0 0 60px rgba(0, 190, 255, .14);
+      padding: clamp(32px, 5vw, 56px) clamp(28px, 5vw, 56px);
+      transform: translateY(24px) scale(.97);
+      transition: transform .32s cubic-bezier(.22,.78,.34,1.08);
+    }
+
+    .dl-overlay.is-open .dl-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .dl-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(99, 244, 255, .22);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .06);
+      color: rgba(200, 240, 255, .8);
+      cursor: pointer;
+      transition: background .18s, color .18s, border-color .18s;
+    }
+
+    .dl-close:hover {
+      background: rgba(99, 244, 255, .14);
+      color: #fff;
+      border-color: rgba(99, 244, 255, .55);
+    }
+
+    .dl-close svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2.5;
+    }
+
+    .dl-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .dl-icon {
+      flex-shrink: 0;
+      width: 72px;
+      height: 72px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.28), transparent 30%),
+                  linear-gradient(145deg, rgba(90, 247, 255, .95), rgba(0, 88, 202, .7));
+      box-shadow: inset 0 0 0 3px rgba(120, 245, 255, .36),
+                  0 0 28px rgba(0, 216, 255, .5);
+      color: white;
+    }
+
+    .dl-icon svg {
+      width: 36px;
+      height: 36px;
+      stroke-width: 3.5;
+    }
+
+    .dl-title {
+      margin: 0 0 4px;
+      font-size: clamp(24px, 2.8vw, 38px);
+      font-weight: 900;
+      letter-spacing: -.04em;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .dl-subtitle {
+      margin: 0;
+      font-size: clamp(14px, 1.1vw, 18px);
+      color: rgba(180, 230, 255, .76);
+      font-weight: 500;
+    }
+
+    .dl-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(99, 244, 255, .3), transparent);
+      margin: 0 0 28px;
+    }
+
+    .dl-file-row {
+      display: grid;
+      grid-template-columns: 56px 1fr auto;
+      align-items: center;
+      gap: 18px;
+      padding: 18px 22px;
+      border-radius: 18px;
+      border: 1px solid rgba(99, 244, 255, .18);
+      background: rgba(255, 255, 255, .04);
+      margin-bottom: 24px;
+    }
+
+    .dl-file-ico {
+      width: 48px;
+      height: 56px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #1c6ec4, #0a3d7a);
+      border: 1px solid rgba(120, 200, 255, .3);
+      box-shadow: 0 0 14px rgba(0, 160, 255, .25);
+      color: #63f4ff;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .05em;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .dl-file-ico svg {
+      width: 24px;
+      height: 24px;
+      stroke-width: 2;
+    }
+
+    .dl-file-name {
+      font-size: clamp(15px, 1.3vw, 20px);
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 3px;
+    }
+
+    .dl-file-meta {
+      font-size: clamp(12px, .95vw, 15px);
+      color: rgba(160, 220, 255, .7);
+      margin: 0;
+    }
+
+    .dl-file-badge {
+      padding: 6px 14px;
+      border-radius: 30px;
+      background: rgba(99, 244, 255, .1);
+      border: 1px solid rgba(99, 244, 255, .28);
+      color: var(--cyan);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .dl-action-btn {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      width: 100%;
+      min-height: 80px;
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 28px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #75fbff 0%, #28d9ee 54%, #15b8da 100%);
+      color: #04214b;
+      font: inherit;
+      font-size: clamp(22px, 2.2vw, 32px);
+      font-weight: 900;
+      letter-spacing: -.04em;
+      text-align: left;
+      box-shadow: 0 0 0 2px rgba(205, 255, 255, .5) inset,
+                  0 0 32px rgba(51, 232, 255, .55),
+                  0 14px 28px rgba(0, 0, 0, .3);
+      transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+      text-decoration: none;
+    }
+
+    .dl-action-btn:hover,
+    .dl-action-btn:focus-visible {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+      box-shadow: 0 0 0 2px rgba(205, 255, 255, .74) inset,
+                  0 0 46px rgba(51, 232, 255, .75),
+                  0 18px 36px rgba(0, 0, 0, .34);
+      outline: none;
+    }
+
+    .dl-action-btn svg {
+      width: 38px;
+      height: 38px;
+      stroke-width: 4;
+    }
+
+    .dl-note {
+      margin: 18px 0 0;
+      text-align: center;
+      font-size: clamp(12px, .95vw, 15px);
+      color: rgba(180, 228, 255, .65);
+      line-height: 1.5;
+    }
+
+    .dl-note strong {
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    /* ── ELEVENLABS WIDGET — always on top ── */
+    elevenlabs-convai {
+      position: fixed;
+      z-index: 9999;
+    }
+
+    /* v2 "recommended" tags */
+    .dl-version-tags {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .dl-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .dl-tag--new {
+      background: linear-gradient(90deg, rgba(99, 244, 255, .22), rgba(0, 190, 255, .16));
+      border: 1px solid rgba(99, 244, 255, .5);
+      color: var(--cyan);
+    }
+
+    .dl-tag--rec {
+      background: rgba(30, 220, 120, .12);
+      border: 1px solid rgba(30, 220, 120, .38);
+      color: #5ef5b0;
+    }
+
+    .dl-file-row--v2 {
+      border-color: rgba(99, 244, 255, .32);
+      background: rgba(99, 244, 255, .06);
+    }
+
+    /* v1 secondary section */
+    .dl-or-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+      color: rgba(160, 215, 255, .5);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .dl-or-divider::before,
+    .dl-or-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(99, 244, 255, .15);
+    }
+
+    .dl-v1-row {
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(99, 244, 255, .1);
+      background: rgba(255, 255, 255, .025);
+      margin-bottom: 12px;
+    }
+
+    .dl-v1-ico {
+      width: 40px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 7px;
+      background: linear-gradient(145deg, #143259, #0a1f3a);
+      border: 1px solid rgba(99, 180, 255, .22);
+      color: rgba(99, 244, 255, .7);
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .dl-v1-ico svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2;
+    }
+
+    .dl-v1-name {
+      font-size: clamp(13px, 1.05vw, 16px);
+      font-weight: 700;
+      color: rgba(220, 240, 255, .85);
+      margin: 0 0 2px;
+    }
+
+    .dl-v1-meta {
+      font-size: clamp(11px, .85vw, 13px);
+      color: rgba(140, 200, 255, .55);
+      margin: 0;
+    }
+
+    .dl-v1-badge {
+      padding: 4px 11px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(99, 244, 255, .14);
+      color: rgba(160, 220, 255, .6);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .dl-v1-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      width: 100%;
+      padding: 13px 22px;
+      border-radius: 14px;
+      border: 1px solid rgba(99, 244, 255, .22);
+      background: rgba(99, 244, 255, .07);
+      color: rgba(160, 230, 255, .9);
+      font: inherit;
+      font-size: clamp(13px, 1.05vw, 16px);
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .18s, border-color .18s, color .18s;
+    }
+
+    .dl-v1-btn:hover,
+    .dl-v1-btn:focus-visible {
+      background: rgba(99, 244, 255, .13);
+      border-color: rgba(99, 244, 255, .4);
+      color: #fff;
+      outline: none;
+    }
+
+    .dl-v1-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2.5;
+    }
+
+    /* ── KEY INFO SECTION ── */
+    .info-section {
+      position: relative;
+      z-index: 3;
+      max-width: 1760px;
+      margin: 0 auto;
+      padding: clamp(32px, 4vw, 64px) clamp(22px, 4vw, 72px) clamp(28px, 3vw, 52px);
+    }
+
+    .info-section::before {
+      content: "";
+      display: block;
+      width: min(760px, 100%);
+      height: 1px;
+      margin: 0 auto clamp(28px, 3vw, 48px);
+      background: linear-gradient(90deg, transparent, rgba(99, 244, 255, .36), transparent);
+    }
+
+    .info-heading {
+      text-align: center;
+      margin: 0 0 clamp(24px, 2.5vw, 40px);
+      font-size: clamp(26px, 2.8vw, 44px);
+      font-weight: 900;
+      letter-spacing: -.04em;
+      color: var(--text);
+    }
+
+    .info-heading span {
+      color: var(--cyan);
+      text-shadow: 0 0 22px rgba(91, 241, 255, .4);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(14px, 1.8vw, 24px);
+    }
+
+    .info-card {
+      padding: clamp(20px, 1.8vw, 30px);
+      border-radius: 20px;
+      border: 1px solid rgba(99, 244, 255, .16);
+      background: linear-gradient(150deg, rgba(5, 18, 50, .7), rgba(3, 12, 34, .8));
+      box-shadow: inset 0 0 28px rgba(0, 180, 255, .05);
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .info-card-icon {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.22), transparent 35%),
+                  linear-gradient(145deg, rgba(80, 230, 255, .85), rgba(0, 70, 180, .6));
+      box-shadow: inset 0 0 0 2px rgba(120, 245, 255, .3), 0 0 18px rgba(0, 200, 255, .35);
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .info-card-icon svg {
+      width: 26px;
+      height: 26px;
+      stroke-width: 2.8;
+    }
+
+    .info-card-title {
+      margin: 0 0 6px;
+      font-size: clamp(15px, 1.2vw, 20px);
+      font-weight: 800;
+      letter-spacing: -.025em;
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    .info-card-desc {
+      margin: 0;
+      font-size: clamp(13px, .95vw, 16px);
+      color: rgba(190, 225, 255, .76);
+      line-height: 1.45;
+    }
+
+    .info-card-desc strong {
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    @media (max-width: 1180px) {
+      .info-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .info-section {
+        padding: 24px 16px 32px;
+      }
+
+      .dl-v1-row {
+        grid-template-columns: 36px 1fr auto;
+        gap: 10px;
+        padding: 12px 14px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1362,10 +1879,13 @@
       </div>
 
       <div class="actions">
-        <a class="download-btn" id="downloadButton" href="https://github.com/powtarzasie/mojatranskrypcja/releases/download/v1.0.0/WhisperVoice_1.0.zip" download>
+        <button class="download-btn" id="downloadButton" type="button" aria-haspopup="dialog" aria-controls="downloadModal">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 21h16"></path></svg>
-          <span>Pobierz za darmo</span>
-        </a>
+          <span class="download-btn-inner">
+            Pobierz za darmo
+            <small class="download-btn-sub">✦ Nowa wersja v2.0 · aktualizacja 20.05</small>
+          </span>
+        </button>
         <p class="download-stats" id="downloadStats">Pobrań: —</p>
       </div>
 
@@ -1415,6 +1935,144 @@
     <div class="benefit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="2"></rect><path d="M2 20h20"></path><path d="M8 16h8l1 4H7l1-4Z"></path></svg><span>Bez internetu,<br />bez kompromisów</span></div>
   </section>
 
+  <!-- DOWNLOAD MODAL -->
+  <div class="dl-overlay" id="downloadModal" role="dialog" aria-modal="true" aria-labelledby="dlTitle">
+    <div class="dl-card">
+      <button class="dl-close" id="dlClose" aria-label="Zamknij">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+
+      <div class="dl-header">
+        <div class="dl-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 21h16"></path></svg>
+        </div>
+        <div>
+          <h2 class="dl-title" id="dlTitle">Pobierz WhisperVoice</h2>
+          <p class="dl-subtitle">Lokalny voice-to-text na Windows — w całości offline</p>
+        </div>
+      </div>
+
+      <div class="dl-divider"></div>
+
+      <!-- v2.0 — EXE Installer -->
+      <div class="dl-version-tags">
+        <span class="dl-tag dl-tag--new">✦ Nowość</span>
+        <span class="dl-tag dl-tag--rec">✓ Zalecane</span>
+      </div>
+
+      <div class="dl-file-row dl-file-row--v2">
+        <div class="dl-file-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+          EXE
+        </div>
+        <div>
+          <p class="dl-file-name">WhisperVoice_2.0_Setup.exe</p>
+          <p class="dl-file-meta">Instalator EXE &bull; Instaluje wszystko automatycznie &bull; Build 17.05.2026</p>
+        </div>
+        <span class="dl-file-badge">v2.0</span>
+      </div>
+
+      <a class="dl-action-btn" id="dlActionBtnV2" href="https://github.com/powtarzasie/mojatranskrypcja/releases/download/v2.0/WhisperVoice_2.0_Setup.exe" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 21h16"></path></svg>
+        Pobierz za darmo
+      </a>
+      <p class="download-stats" id="dlStatsV2">Pobrań: —</p>
+
+      <!-- v1.0 — ZIP separator -->
+      <div class="dl-or-divider">lub starsza wersja (ZIP, instalacja manualna)</div>
+
+      <div class="dl-v1-row">
+        <div class="dl-v1-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+          ZIP
+        </div>
+        <div>
+          <p class="dl-v1-name">WhisperVoice_1.0.zip</p>
+          <p class="dl-v1-meta" id="dlMeta">Windows 10 / 11 &bull; Wymaga ręcznej instalacji Python</p>
+        </div>
+        <span class="dl-v1-badge">v1.0</span>
+      </div>
+
+      <a class="dl-v1-btn" id="dlActionBtn" href="https://github.com/powtarzasie/mojatranskrypcja/releases/download/v1.0.0/WhisperVoice_1.0.zip" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 21h16"></path></svg>
+        WhisperVoice v1.0 (.zip)
+      </a>
+      <p class="download-stats" id="dlStatsV1" style="font-size:clamp(12px,.85vw,14px); margin-top:8px;">Pobrań: —</p>
+
+      <p class="dl-note">
+        <strong>100% bezpieczne</strong> &bull; Twoje dane zostają u Ciebie &bull; Działa offline
+      </p>
+    </div>
+  </div>
+
+  <!-- KEY INFO SECTION -->
+  <section class="info-section" aria-label="Kluczowe informacje o aplikacji">
+    <h2 class="info-heading">Co warto wiedzieć <span>przed pobraniem</span></h2>
+    <div class="info-grid">
+
+      <div class="info-card">
+        <div class="info-card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.82a15 15 0 0 1 20 0"></path><line x1="2" y1="2" x2="22" y2="22"></line><path d="M5 12.15a10 10 0 0 1 3.6-2.05"></path><path d="M8.5 15.55a5 5 0 0 1 7 0"></path></svg>
+        </div>
+        <div>
+          <p class="info-card-title">Działa w pełni offline</p>
+          <p class="info-card-desc">Po jednorazowym pobraniu modelu (<strong>~3 GB</strong>) internet nie jest już potrzebny. Audio nigdy nie opuszcza Twojego komputera.</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h8l-1 8 11-14h-8l0-6Z"></path></svg>
+        </div>
+        <div>
+          <p class="info-card-title">3–5× szybsze od oryginału</p>
+          <p class="info-card-desc">Biblioteka <strong>faster-whisper</strong> (SYSTRAN) uruchamia ten sam model Whisper large-v3 przez silnik CTranslate2 — identyczna jakość, drastycznie mniej RAM i VRAM.</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        </div>
+        <div>
+          <p class="info-card-title">Hotkey bez restartu</p>
+          <p class="info-card-desc"><strong>7 gotowych presetów</strong> (Scroll Lock, F12, Ctrl+Space…) + opcja „Własny…" — przechwytuje dowolną kombinację klawiszy. Zmiana aktywna od razu, bez edycji plików.</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"></path></svg>
+        </div>
+        <div>
+          <p class="info-card-title">6 modeli jakości</p>
+          <p class="info-card-desc">Od <strong>tiny</strong> (~70 MB, szybki na słabym sprzęcie) do <strong>large-v3</strong> (~3 GB, najdokładniejszy). Zmiana z menu trayu — model pobiera się raz.</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="11" rx="2"></rect><path d="M2 20h20"></path><path d="M8 16h8l1 4H7l1-4Z"></path></svg>
+        </div>
+        <div>
+          <p class="info-card-title">Wymagania systemowe</p>
+          <p class="info-card-desc">Windows 10 / 11 (64-bit) + mikrofon. Karta <strong>NVIDIA ≥ 4 GB VRAM</strong> = transkrypcja natychmiastowa. Bez GPU też działa — po prostu chwilę dłużej.</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-5"></path></svg>
+        </div>
+        <div>
+          <p class="info-card-title">Zero telemetrii — RODO-friendly</p>
+          <p class="info-card-desc">Aplikacja nie zbiera, nie przesyła i nie przechowuje żadnych danych. Brak kont, logowania, śledzenia. Ustawienia zapisywane wyłącznie lokalnie w <strong>%APPDATA%</strong>.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <footer class="site-footer">
     <p>&copy; 2026 Mariusz Świerguła &bull; <a href="mailto:Mariusz.swiergula@gmail.com">Mariusz.swiergula@gmail.com</a></p>
   </footer>
@@ -1424,55 +2082,97 @@
     const ASSET_NAME = "WhisperVoice_1.0.zip";
     const FALLBACK_DOWNLOAD_URL = "https://github.com/powtarzasie/mojatranskrypcja/releases/download/v1.0.0/WhisperVoice_1.0.zip";
 
-    const downloadButton = document.getElementById("downloadButton");
-    const downloadStats = document.getElementById("downloadStats");
+    const downloadButton  = document.getElementById("downloadButton");
+    const downloadStats   = document.getElementById("downloadStats");
+    const dlModal         = document.getElementById("downloadModal");
+    const dlClose         = document.getElementById("dlClose");
+    const dlActionBtn     = document.getElementById("dlActionBtn");     // v1.0 ZIP
+    const dlActionBtnV2   = document.getElementById("dlActionBtnV2");   // v2.0 EXE
+    const dlMeta          = document.getElementById("dlMeta");
+    const dlStatsV2       = document.getElementById("dlStatsV2");
+    const dlStatsV1       = document.getElementById("dlStatsV1");
 
-    function setDownloadUrl(url) {
-      downloadButton.href = url || FALLBACK_DOWNLOAD_URL;
-      downloadButton.setAttribute("download", "");
+    /* ── Modal open / close ── */
+    function openModal() {
+      dlModal.classList.add("is-open");
+      document.body.style.overflow = "hidden";
+      dlClose.focus();
     }
 
-    function setDownloadCount(count) {
-      if (typeof count !== "number") {
-        downloadStats.textContent = "Pobrań: —";
-        return;
-      }
-
-      downloadStats.innerHTML = `Pobrań: <strong>${count.toLocaleString("pl-PL")}</strong>`;
+    function closeModal() {
+      dlModal.classList.remove("is-open");
+      document.body.style.overflow = "";
+      downloadButton.focus();
     }
 
+    downloadButton.addEventListener("click", openModal);
+    dlClose.addEventListener("click", closeModal);
+
+    dlModal.addEventListener("click", (e) => {
+      if (e.target === dlModal) closeModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && dlModal.classList.contains("is-open")) closeModal();
+    });
+
+    /* ── GitHub release data ── */
+    function fmt(n) { return n.toLocaleString("pl-PL"); }
+
+    function setStatsEl(el, count) {
+      if (!el) return;
+      if (typeof count !== "number") { el.textContent = "Pobrań: —"; return; }
+      el.innerHTML = `Pobrań: <strong>${fmt(count)}</strong>`;
+    }
+
+    /* v1.0 — ZIP */
     async function loadReleaseDownloadData() {
-      setDownloadUrl(FALLBACK_DOWNLOAD_URL);
+      dlActionBtn.href = FALLBACK_DOWNLOAD_URL;
 
       try {
-        const response = await fetch(RELEASE_API_URL, {
-          headers: {
-            "Accept": "application/vnd.github+json"
-          }
-        });
+        const res = await fetch(RELEASE_API_URL, { headers: { "Accept": "application/vnd.github+json" } });
+        if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+        const rel = await res.json();
+        const asset = rel.assets.find(a => a.name === ASSET_NAME);
+        if (!asset) { setStatsEl(downloadStats, null); setStatsEl(dlStatsV1, null); return; }
+        dlActionBtn.href = asset.browser_download_url;
+        setStatsEl(downloadStats, asset.download_count);
+        setStatsEl(dlStatsV1, asset.download_count);
+        dlMeta.innerHTML = `Windows 10 / 11 &bull; Wymaga ręcznej instalacji Python &bull; <strong style="color:var(--cyan)">${fmt(asset.download_count)} pobrań</strong>`;
+      } catch (e) {
+        console.warn("GitHub API v1:", e);
+        setStatsEl(downloadStats, null);
+        setStatsEl(dlStatsV1, null);
+      }
+    }
 
-        if (!response.ok) {
-          throw new Error(`GitHub API error: ${response.status}`);
-        }
+    /* v2.0 — EXE */
+    async function loadV2DownloadData() {
+      const V2_API  = "https://api.github.com/repos/powtarzasie/mojatranskrypcja/releases/tags/v2.0";
+      const V2_NAME = "WhisperVoice_2.0_Setup.exe";
+      const V2_FALLBACK = "https://github.com/powtarzasie/mojatranskrypcja/releases/download/v2.0/WhisperVoice_2.0_Setup.exe";
+      dlActionBtnV2.href = V2_FALLBACK;
 
-        const release = await response.json();
-        const asset = release.assets.find((item) => item.name === ASSET_NAME);
-
-        if (!asset) {
-          setDownloadCount(null);
-          return;
-        }
-
-        setDownloadUrl(asset.browser_download_url);
-        setDownloadCount(asset.download_count);
-      } catch (error) {
-        console.warn("Nie udało się pobrać licznika pobrań z GitHuba:", error);
-        setDownloadUrl(FALLBACK_DOWNLOAD_URL);
-        setDownloadCount(null);
+      try {
+        const res = await fetch(V2_API, { headers: { "Accept": "application/vnd.github+json" } });
+        if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+        const rel = await res.json();
+        const asset = rel.assets.find(a => a.name === V2_NAME);
+        if (!asset) { setStatsEl(dlStatsV2, null); return; }
+        dlActionBtnV2.href = asset.browser_download_url;
+        setStatsEl(dlStatsV2, asset.download_count);
+      } catch (e) {
+        console.warn("GitHub API v2:", e);
+        setStatsEl(dlStatsV2, null);
       }
     }
 
     loadReleaseDownloadData();
+    loadV2DownloadData();
   </script>
+
+  <!-- ElevenLabs ConvAI — floating AI assistant -->
+  <elevenlabs-convai agent-id="agent_3101ks2c10c5fnhtmr27nav9zd18"></elevenlabs-convai>
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
 </body>
 </html>
