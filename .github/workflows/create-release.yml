@@ -1,0 +1,48 @@
+name: Create Release on Tag
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine EXE filename
+        id: vars
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          # Mapuj tag -> nazwę pliku
+          case "$TAG" in
+            v3.2) EXE="WhisperVoice_Setup_v3.2.exe" ;;
+            v2.0) EXE="WhisperVoice_Setup_v2.0.exe" ;;
+            v1.0.0) EXE="WhisperVoice_1.0.zip" ;;
+            *) EXE="" ;;
+          esac
+          echo "exe=$EXE" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.tag }}
+          name: WhisperVoice ${{ steps.vars.outputs.tag }}
+          body: |
+            ## WhisperVoice ${{ steps.vars.outputs.tag }}
+
+            Lokalny voice-to-text na Windows oparty o OpenAI Whisper large-v3.
+            Działa offline, po polsku i za darmo.
+
+            ### Instalacja
+            Pobierz plik `.exe` i uruchom jako administrator.
+          files: ${{ steps.vars.outputs.exe }}
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
