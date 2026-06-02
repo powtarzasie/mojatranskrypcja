@@ -1845,7 +1845,7 @@
           <path d="M8 16h8l1 4H7l1-4Z"></path>
           <path d="M13 8 10 12h3l-1 3 4-5h-3l0-2Z"></path>
         </svg>
-        <p>Działa na każdym komputerze z <strong>Windows</strong>. Z kartą <strong>NVIDIA</strong> — transkrypcja natychmiastowa. Bez GPU — też działa, tylko chwilę dłużej czeka.</p>
+        <p>Działa na każdym komputerze z <strong>Windows</strong> — <strong>bez uprawnień administratora</strong>. Z kartą <strong>NVIDIA</strong> — kilkanaście razy szybciej. Bez GPU — też działa, nieco wolniej.</p>
       </div>
 
       <div class="features" aria-label="Najważniejsze cechy">
@@ -1875,6 +1875,13 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V5a2 2 0 1 1 4 0v7"></path><path d="M12 12V4a2 2 0 1 1 4 0v9"></path><path d="M16 13V7a2 2 0 1 1 4 0v9a6 6 0 0 1-6 6h-2.7a6 6 0 0 1-4.7-2.3L3.8 16a2 2 0 0 1 3-2.6L8 15"></path></svg>
           </div>
           <p>Jedno kliknięcie<br />i dyktujesz</p>
+        </div>
+
+        <div class="feature">
+          <div class="icon-circle" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+          </div>
+          <p>Bez admina<br />i konfiguracji</p>
         </div>
       </div>
 
@@ -2036,7 +2043,7 @@
         </div>
         <div>
           <p class="info-card-title">Działa w pełni offline</p>
-          <p class="info-card-desc">Po jednorazowym pobraniu modelu (<strong>~3 GB</strong>) internet nie jest już potrzebny. Audio nigdy nie opuszcza Twojego komputera.</p>
+          <p class="info-card-desc">Po jednorazowym pobraniu (<strong>~3 GB</strong> modelu + biblioteki) internet nie jest już potrzebny. Audio nigdy nie opuszcza Twojego komputera — pełna prywatność bez kompromisów.</p>
         </div>
       </div>
 
@@ -2045,8 +2052,8 @@
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h8l-1 8 11-14h-8l0-6Z"></path></svg>
         </div>
         <div>
-          <p class="info-card-title">3–5× szybsze od oryginału</p>
-          <p class="info-card-desc">Biblioteka <strong>faster-whisper</strong> (SYSTRAN) uruchamia ten sam model Whisper large-v3 przez silnik CTranslate2 — identyczna jakość, drastycznie mniej RAM i VRAM.</p>
+          <p class="info-card-title">Z NVIDIA — kilkanaście razy szybciej</p>
+          <p class="info-card-desc">Na karcie <strong>NVIDIA ≥ 4 GB VRAM</strong> z komponentami CUDA transkrypcja jest nawet kilkanaście razy szybsza niż bez GPU. Silnik <strong>faster-whisper</strong> (CTranslate2) minimalizuje zużycie RAM i VRAM przy tej samej dokładności.</p>
         </div>
       </div>
 
@@ -2076,7 +2083,7 @@
         </div>
         <div>
           <p class="info-card-title">Wymagania systemowe</p>
-          <p class="info-card-desc">Windows 10 / 11 (64-bit) + mikrofon. Karta <strong>NVIDIA ≥ 4 GB VRAM</strong> = transkrypcja natychmiastowa. Bez GPU też działa — po prostu chwilę dłużej.</p>
+          <p class="info-card-desc">Windows 10 / 11 (64-bit) + mikrofon + <strong>~4–5 GB</strong> miejsca na dysku. Instaluje się <strong>bez uprawnień administratora</strong> — Python pobierany automatycznie. Karta NVIDIA ≥ 4 GB VRAM zalecana, ale niewymagana.</p>
         </div>
       </div>
 
