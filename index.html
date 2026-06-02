@@ -1993,7 +1993,7 @@
         </div>
         <span class="dl-v1-badge">v2.0</span>
       </div>
-      <a class="dl-v1-btn" id="dlActionBtnV2arc" href="https://github.com/powtarzasie/mojatranskrypcja/releases/download/v2.0/WhisperVoice_2.0_Setup.exe" download>
+      <a class="dl-v1-btn" id="dlActionBtnV2arc" href="https://github.com/powtarzasie/mojatranskrypcja/releases/download/v2.0/WhisperVoice_Setup_v2.0.exe" download>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 21h16"></path></svg>
         WhisperVoice v2.0 (.exe)
       </a>
@@ -2177,8 +2177,8 @@
     /* v2.0 — EXE (archiwum) */
     async function loadV2DownloadData() {
       const V2_API  = "https://api.github.com/repos/powtarzasie/mojatranskrypcja/releases/tags/v2.0";
-      const V2_NAME = "WhisperVoice_2.0_Setup.exe";
-      const V2_FALLBACK = "https://github.com/powtarzasie/mojatranskrypcja/releases/download/v2.0/WhisperVoice_2.0_Setup.exe";
+      const V2_NAME = "WhisperVoice_Setup_v2.0.exe";
+      const V2_FALLBACK = "https://github.com/powtarzasie/mojatranskrypcja/releases/download/v2.0/WhisperVoice_Setup_v2.0.exe";
       const dlActionBtnV2arc = document.getElementById("dlActionBtnV2arc");
       const dlStatsV2arc = document.getElementById("dlStatsV2arc");
       if (dlActionBtnV2arc) dlActionBtnV2arc.href = V2_FALLBACK;
