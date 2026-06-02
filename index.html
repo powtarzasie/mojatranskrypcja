@@ -1883,7 +1883,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 21h16"></path></svg>
           <span class="download-btn-inner">
             Pobierz za darmo
-            <small class="download-btn-sub">✦ Nowa wersja v2.0 · aktualizacja 20.05</small>
+            <small class="download-btn-sub">✦ Nowa wersja v3.2 · aktualizacja 02.06</small>
           </span>
         </button>
         <p class="download-stats" id="downloadStats">Pobrań: —</p>
@@ -1954,7 +1954,7 @@
 
       <div class="dl-divider"></div>
 
-      <!-- v2.0 — EXE Installer -->
+      <!-- v3.2 — EXE Installer -->
       <div class="dl-version-tags">
         <span class="dl-tag dl-tag--new">✦ Nowość</span>
         <span class="dl-tag dl-tag--rec">✓ Zalecane</span>
@@ -1966,20 +1966,40 @@
           EXE
         </div>
         <div>
-          <p class="dl-file-name">WhisperVoice_2.0_Setup.exe</p>
-          <p class="dl-file-meta">Instalator EXE &bull; Instaluje wszystko automatycznie &bull; Build 17.05.2026</p>
+          <p class="dl-file-name">WhisperVoice_Setup_v3.2.exe</p>
+          <p class="dl-file-meta">Instalator EXE &bull; Instaluje wszystko automatycznie &bull; Build 02.06.2026</p>
         </div>
-        <span class="dl-file-badge">v2.0</span>
+        <span class="dl-file-badge">v3.2</span>
       </div>
 
-      <a class="dl-action-btn" id="dlActionBtnV2" href="https://github.com/powtarzasie/mojatranskrypcja/releases/download/v2.0/WhisperVoice_2.0_Setup.exe" download>
+      <a class="dl-action-btn" id="dlActionBtnV2" href="https://github.com/powtarzasie/mojatranskrypcja/releases/download/v3.2/WhisperVoice_Setup_v3.2.exe" download>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 21h16"></path></svg>
         Pobierz za darmo
       </a>
       <p class="download-stats" id="dlStatsV2">Pobrań: —</p>
 
       <!-- v1.0 — ZIP separator -->
-      <div class="dl-or-divider">lub starsza wersja (ZIP, instalacja manualna)</div>
+      <div class="dl-or-divider">lub starsza wersja</div>
+
+      <!-- v2.0 — archiwum -->
+      <div class="dl-v1-row">
+        <div class="dl-v1-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+          EXE
+        </div>
+        <div>
+          <p class="dl-v1-name">WhisperVoice_Setup_v2.0.exe</p>
+          <p class="dl-v1-meta">Windows 10 / 11 &bull; Instalator &bull; Build 17.05.2026</p>
+        </div>
+        <span class="dl-v1-badge">v2.0</span>
+      </div>
+      <a class="dl-v1-btn" id="dlActionBtnV2arc" href="https://github.com/powtarzasie/mojatranskrypcja/releases/download/v2.0/WhisperVoice_2.0_Setup.exe" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 21h16"></path></svg>
+        WhisperVoice v2.0 (.exe)
+      </a>
+      <p class="download-stats" id="dlStatsV2arc" style="font-size:clamp(12px,.85vw,14px); margin-top:8px;">Pobrań: —</p>
+
+      <div class="dl-or-divider" style="margin-top:12px;">lub v1.0 (ZIP, instalacja manualna)</div>
 
       <div class="dl-v1-row">
         <div class="dl-v1-ico" aria-hidden="true">
@@ -2125,50 +2145,84 @@
       el.innerHTML = `Pobrań: <strong>${fmt(count)}</strong>`;
     }
 
+    /* ── Licznik całkowity — suma wszystkich wersji ── */
+    const _dlCounts = { v1: null, v2: null, v32: null };
+
+    function _refreshTotal() {
+      const vals = Object.values(_dlCounts).filter(v => typeof v === "number");
+      if (vals.length === 0) { setStatsEl(downloadStats, null); return; }
+      setStatsEl(downloadStats, vals.reduce((a, b) => a + b, 0));
+    }
+
     /* v1.0 — ZIP */
     async function loadReleaseDownloadData() {
       dlActionBtn.href = FALLBACK_DOWNLOAD_URL;
-
       try {
         const res = await fetch(RELEASE_API_URL, { headers: { "Accept": "application/vnd.github+json" } });
         if (!res.ok) throw new Error(`GitHub API ${res.status}`);
         const rel = await res.json();
         const asset = rel.assets.find(a => a.name === ASSET_NAME);
-        if (!asset) { setStatsEl(downloadStats, null); setStatsEl(dlStatsV1, null); return; }
+        if (!asset) { setStatsEl(dlStatsV1, null); return; }
         dlActionBtn.href = asset.browser_download_url;
-        setStatsEl(downloadStats, asset.download_count);
+        _dlCounts.v1 = asset.download_count;
         setStatsEl(dlStatsV1, asset.download_count);
         dlMeta.innerHTML = `Windows 10 / 11 &bull; Wymaga ręcznej instalacji Python &bull; <strong style="color:var(--cyan)">${fmt(asset.download_count)} pobrań</strong>`;
+        _refreshTotal();
       } catch (e) {
         console.warn("GitHub API v1:", e);
-        setStatsEl(downloadStats, null);
         setStatsEl(dlStatsV1, null);
       }
     }
 
-    /* v2.0 — EXE */
+    /* v2.0 — EXE (archiwum) */
     async function loadV2DownloadData() {
       const V2_API  = "https://api.github.com/repos/powtarzasie/mojatranskrypcja/releases/tags/v2.0";
       const V2_NAME = "WhisperVoice_2.0_Setup.exe";
       const V2_FALLBACK = "https://github.com/powtarzasie/mojatranskrypcja/releases/download/v2.0/WhisperVoice_2.0_Setup.exe";
-      dlActionBtnV2.href = V2_FALLBACK;
-
+      const dlActionBtnV2arc = document.getElementById("dlActionBtnV2arc");
+      const dlStatsV2arc = document.getElementById("dlStatsV2arc");
+      if (dlActionBtnV2arc) dlActionBtnV2arc.href = V2_FALLBACK;
       try {
         const res = await fetch(V2_API, { headers: { "Accept": "application/vnd.github+json" } });
         if (!res.ok) throw new Error(`GitHub API ${res.status}`);
         const rel = await res.json();
         const asset = rel.assets.find(a => a.name === V2_NAME);
-        if (!asset) { setStatsEl(dlStatsV2, null); return; }
-        dlActionBtnV2.href = asset.browser_download_url;
-        setStatsEl(dlStatsV2, asset.download_count);
+        if (!asset) return;
+        if (dlActionBtnV2arc) dlActionBtnV2arc.href = asset.browser_download_url;
+        _dlCounts.v2 = asset.download_count;
+        setStatsEl(dlStatsV2arc, asset.download_count);
+        _refreshTotal();
       } catch (e) {
         console.warn("GitHub API v2:", e);
+        setStatsEl(dlStatsV2arc, null);
+      }
+    }
+
+    /* v3.2 — EXE Installer (najnowszy) */
+    async function loadV32DownloadData() {
+      const V32_API      = "https://api.github.com/repos/powtarzasie/mojatranskrypcja/releases/tags/v3.2";
+      const V32_NAME     = "WhisperVoice_Setup_v3.2.exe";
+      const V32_FALLBACK = "https://github.com/powtarzasie/mojatranskrypcja/releases/download/v3.2/WhisperVoice_Setup_v3.2.exe";
+      dlActionBtnV2.href = V32_FALLBACK;
+      try {
+        const res = await fetch(V32_API, { headers: { "Accept": "application/vnd.github+json" } });
+        if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+        const rel = await res.json();
+        const asset = rel.assets.find(a => a.name === V32_NAME);
+        if (!asset) { setStatsEl(dlStatsV2, null); return; }
+        dlActionBtnV2.href = asset.browser_download_url;
+        _dlCounts.v32 = asset.download_count;
+        setStatsEl(dlStatsV2, asset.download_count);
+        _refreshTotal();
+      } catch (e) {
+        console.warn("GitHub API v3.2:", e);
         setStatsEl(dlStatsV2, null);
       }
     }
 
     loadReleaseDownloadData();
     loadV2DownloadData();
+    loadV32DownloadData();
   </script>
 
   <!-- ElevenLabs ConvAI — tymczasowo wylaczony (quota exceeded)
