@@ -1890,7 +1890,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 21h16"></path></svg>
           <span class="download-btn-inner">
             Pobierz za darmo
-            <small class="download-btn-sub">✦ Nowa wersja v3.2 · aktualizacja 02.06</small>
+            <small class="download-btn-sub">✦ Nowa wersja v3.4 · aktualizacja 14.06</small>
           </span>
         </button>
         <p class="download-stats" id="downloadStats">Pobrań: —</p>
@@ -1961,7 +1961,7 @@
 
       <div class="dl-divider"></div>
 
-      <!-- v3.2 — EXE Installer -->
+      <!-- v3.4 — EXE Installer (najnowszy) -->
       <div class="dl-version-tags">
         <span class="dl-tag dl-tag--new">✦ Nowość</span>
         <span class="dl-tag dl-tag--rec">✓ Zalecane</span>
@@ -1973,20 +1973,41 @@
           EXE
         </div>
         <div>
-          <p class="dl-file-name">WhisperVoice_Setup_v3.2.exe</p>
-          <p class="dl-file-meta">Instalator EXE &bull; Instaluje wszystko automatycznie &bull; Build 02.06.2026</p>
+          <p class="dl-file-name">WhisperVoice_Setup_v3.4.exe</p>
+          <p class="dl-file-meta">Instalator EXE &bull; Instaluje wszystko automatycznie &bull; Build 14.06.2026</p>
+          <p class="dl-file-meta" style="color:var(--cyan)">Nowość w v3.4: zalecany hotkey <strong>Scroll Lock</strong> &bull; usunięto niedziałający Pause/Break</p>
         </div>
-        <span class="dl-file-badge">v3.2</span>
+        <span class="dl-file-badge">v3.4</span>
       </div>
 
-      <a class="dl-action-btn" id="dlActionBtnV2" href="https://github.com/powtarzasie/mojatranskrypcja/releases/download/v3.2/WhisperVoice_Setup_v3.2.exe" download>
+      <a class="dl-action-btn" id="dlActionBtnV2" href="https://github.com/powtarzasie/mojatranskrypcja/releases/download/v3.4/WhisperVoice_Setup_v3.4.exe" download>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 21h16"></path></svg>
         Pobierz za darmo
       </a>
       <p class="download-stats" id="dlStatsV2">Pobrań: —</p>
 
-      <!-- v1.0 — ZIP separator -->
+      <!-- starsze wersje -->
       <div class="dl-or-divider">lub starsza wersja</div>
+
+      <!-- v3.2 — archiwum -->
+      <div class="dl-v1-row">
+        <div class="dl-v1-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+          EXE
+        </div>
+        <div>
+          <p class="dl-v1-name">WhisperVoice_Setup_v3.2.exe</p>
+          <p class="dl-v1-meta">Windows 10 / 11 &bull; Instalator &bull; Build 02.06.2026</p>
+        </div>
+        <span class="dl-v1-badge">v3.2</span>
+      </div>
+      <a class="dl-v1-btn" id="dlActionBtnV32arc" href="https://github.com/powtarzasie/mojatranskrypcja/releases/download/v3.2/WhisperVoice_Setup_v3.2.exe" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 21h16"></path></svg>
+        WhisperVoice v3.2 (.exe)
+      </a>
+      <p class="download-stats" id="dlStatsV32arc" style="font-size:clamp(12px,.85vw,14px); margin-top:8px;">Pobrań: —</p>
+
+      <div class="dl-or-divider" style="margin-top:12px;">lub jeszcze starsza</div>
 
       <!-- v2.0 — archiwum -->
       <div class="dl-v1-row">
@@ -2063,7 +2084,7 @@
         </div>
         <div>
           <p class="info-card-title">Hotkey bez restartu</p>
-          <p class="info-card-desc"><strong>7 gotowych presetów</strong> (Scroll Lock, F12, Ctrl+Space…) + opcja „Własny…" — przechwytuje dowolną kombinację klawiszy. Zmiana aktywna od razu, bez edycji plików.</p>
+          <p class="info-card-desc"><strong>5 gotowych presetów</strong> (Scroll Lock, Prawy Ctrl, Prawy Alt, F13, Ctrl+Space) + opcja „Własny…" — przechwytuje dowolną kombinację. Domyślnie <strong>Scroll Lock</strong>, zmiana aktywna od razu, bez edycji plików.</p>
         </div>
       </div>
 
@@ -2153,7 +2174,7 @@
     }
 
     /* ── Licznik całkowity — suma wszystkich wersji ── */
-    const _dlCounts = { v1: null, v2: null, v32: null };
+    const _dlCounts = { v1: null, v2: null, v32: null, v34: null };
 
     function _refreshTotal() {
       const vals = Object.values(_dlCounts).filter(v => typeof v === "number");
@@ -2205,31 +2226,56 @@
       }
     }
 
-    /* v3.2 — EXE Installer (najnowszy) */
+    /* v3.4 — EXE Installer (najnowszy) */
+    async function loadV34DownloadData() {
+      const V34_API      = "https://api.github.com/repos/powtarzasie/mojatranskrypcja/releases/tags/v3.4";
+      const V34_NAME     = "WhisperVoice_Setup_v3.4.exe";
+      const V34_FALLBACK = "https://github.com/powtarzasie/mojatranskrypcja/releases/download/v3.4/WhisperVoice_Setup_v3.4.exe";
+      dlActionBtnV2.href = V34_FALLBACK;
+      try {
+        const res = await fetch(V34_API, { headers: { "Accept": "application/vnd.github+json" } });
+        if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+        const rel = await res.json();
+        const asset = rel.assets.find(a => a.name === V34_NAME);
+        if (!asset) { setStatsEl(dlStatsV2, null); return; }
+        dlActionBtnV2.href = asset.browser_download_url;
+        _dlCounts.v34 = asset.download_count;
+        setStatsEl(dlStatsV2, asset.download_count);
+        _refreshTotal();
+      } catch (e) {
+        console.warn("GitHub API v3.4:", e);
+        setStatsEl(dlStatsV2, null);
+      }
+    }
+
+    /* v3.2 — EXE (archiwum) */
     async function loadV32DownloadData() {
       const V32_API      = "https://api.github.com/repos/powtarzasie/mojatranskrypcja/releases/tags/v3.2";
       const V32_NAME     = "WhisperVoice_Setup_v3.2.exe";
       const V32_FALLBACK = "https://github.com/powtarzasie/mojatranskrypcja/releases/download/v3.2/WhisperVoice_Setup_v3.2.exe";
-      dlActionBtnV2.href = V32_FALLBACK;
+      const dlActionBtnV32arc = document.getElementById("dlActionBtnV32arc");
+      const dlStatsV32arc = document.getElementById("dlStatsV32arc");
+      if (dlActionBtnV32arc) dlActionBtnV32arc.href = V32_FALLBACK;
       try {
         const res = await fetch(V32_API, { headers: { "Accept": "application/vnd.github+json" } });
         if (!res.ok) throw new Error(`GitHub API ${res.status}`);
         const rel = await res.json();
         const asset = rel.assets.find(a => a.name === V32_NAME);
-        if (!asset) { setStatsEl(dlStatsV2, null); return; }
-        dlActionBtnV2.href = asset.browser_download_url;
+        if (!asset) { setStatsEl(dlStatsV32arc, null); return; }
+        if (dlActionBtnV32arc) dlActionBtnV32arc.href = asset.browser_download_url;
         _dlCounts.v32 = asset.download_count;
-        setStatsEl(dlStatsV2, asset.download_count);
+        setStatsEl(dlStatsV32arc, asset.download_count);
         _refreshTotal();
       } catch (e) {
         console.warn("GitHub API v3.2:", e);
-        setStatsEl(dlStatsV2, null);
+        setStatsEl(dlStatsV32arc, null);
       }
     }
 
     loadReleaseDownloadData();
     loadV2DownloadData();
     loadV32DownloadData();
+    loadV34DownloadData();
   </script>
 
   <!-- ElevenLabs ConvAI — tymczasowo wylaczony (quota exceeded)

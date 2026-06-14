@@ -21,6 +21,7 @@ jobs:
           TAG="${GITHUB_REF_NAME}"
           # Mapuj tag -> nazwę pliku
           case "$TAG" in
+            v3.4) EXE="WhisperVoice_Setup_v3.4.exe" ;;
             v3.2) EXE="WhisperVoice_Setup_v3.2.exe" ;;
             v2.0) EXE="WhisperVoice_Setup_v2.0.exe" ;;
             v1.0.0) EXE="WhisperVoice_1.0.zip" ;;
